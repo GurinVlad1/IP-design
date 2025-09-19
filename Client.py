@@ -49,6 +49,26 @@ class Client:
                 data.get("phone", "")
             )
 
+        def __str__(self):
+            return (f"Client(client_id={self._client_id}, last_name={self._last_name}, first_name={self._first_name}, "
+                    f"middle_name={self._middle_name}, address={self._address}, phone={self._phone})")
+
+
+        def short_str(self):
+            initials = f"{self._first_name[0] if self._first_name else ''}.{self._middle_name[0] if self._middle_name else ''}."
+            return f"{self._last_name} {initials}"
+
+
+        def __eq__(self, other):
+            if not isinstance(other, Client):
+                return False
+            return (self._client_id == other._client_id and
+                    self._last_name == other._last_name and
+                    self._first_name == other._first_name and
+                    self._middle_name == other._middle_name and
+                    self._address == other._address and
+                    self._phone == other._phone)
+
     @property
     def client_id(self):
         return self._client_id
