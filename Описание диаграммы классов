@@ -1,0 +1,64 @@
+1. Класс Client
+Атрибуты:
+clientID: int — уникальный идентификатор клиента.
+lastName: string — фамилия клиента.
+firstName: string — имя клиента.
+middleName: string — отчество клиента.
+address: string — адрес клиента.
+phone: string — телефон клиента.
+Методы:
+Конструктор: Client(...) — инициализация объекта с передачей всех атрибутов.
+validateData(): bool — валидация данных клиента.
+Геттеры/сеттеры: getClientID(), setLastName() и т.д. — доступ и изменение атрибутов.
+getFullName(): string — получение полного имени клиента.
+toString(): string — строковое представление объекта.
+
+
+2. Класс Car
+Атрибуты:
+carID: int — уникальный идентификатор автомобиля.
+brand: string — марка автомобиля.
+model: string — модель автомобиля.
+purchasePrice: double — цена покупки автомобиля.
+rentalPricePerDay: double — стоимость аренды за день.
+Методы:
+Конструктор: Car(...) — инициализация с передачей атрибутов.
+validateData(): bool — валидация данных автомобиля.
+Геттеры/сеттеры: getCarID(), setBrand() и т.д.
+calculateRentalCost(days: int): double — расчёт общей стоимости аренды по дням.
+toString(): string — строковое представление.
+
+
+3. Класс Rental
+Атрибуты:
+rentalID: int — уникальный идентификатор аренды.
+clientID: int — ID клиента (связь с Client).
+carID: int — ID автомобиля (связь с Car).
+issueDate: Date — дата выдачи.
+expectedReturnDate: Date — ожидаемая дата возврата.
+actualReturnDate: Date — фактическая дата возврата.
+Методы:
+Конструктор: Rental(...) — инициализация с атрибутами.
+validateData(): bool — валидация данных аренды.
+Геттеры/сеттеры: getRentalID(), setActualReturnDate() и т.д.
+isOverdue(): bool — проверка, просрочена ли аренда.
+calculateFine(): double — расчёт штрафа за просрочку.
+toString(): string — строковое представление.
+
+
+4. Класс RentalPoint
+Атрибуты:
+pointID: int — уникальный идентификатор пункта проката.
+location: string — адрес пункта.
+managerName: string — имя менеджера пункта.
+Методы:
+Конструктор: RentalPoint(...) — инициализация.
+validateData(): bool — валидация данных.
+Геттеры/сеттеры: getPointID(), setLocation() и т.д.
+toString(): string — строковое представление.
+
+
+Связи между классами
+Client → Rental: Один-к-ко-многим (один клиент может иметь несколько аренд; ассоциация "has").
+Car → Rental: Один-к-ко-многим (один автомобиль может участвовать в нескольких арендах; ассоциация "is rented in").
+RentalPoint → Rental: Многие-к-одному (один пункт может управлять несколькими арендами; опциональная ассоциация "manages" для полноты модели).
