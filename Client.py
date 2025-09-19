@@ -1,3 +1,4 @@
+import json
 class Client:
     def validate_client_id(value):
         if not isinstance(value, str) or not value.strip():
@@ -28,6 +29,25 @@ class Client:
         self._middle_name = middle_name
         self._address = address
         self._phone = phone
+
+        def from_string(cls, s):
+            parts = s.split(';')
+            if len(parts) != 6:
+                raise ValueError("Неверный формат строки")
+            return cls(parts[0].strip(), parts[1].strip(), parts[2].strip(), parts[3].strip(), parts[4].strip(),
+                       parts[5].strip())
+
+        @classmethod
+        def from_json(cls, json_str):
+            data = json.loads(json_str)
+            return cls(
+                data.get("client_id", ""),
+                data.get("last_name", ""),
+                data.get("first_name", ""),
+                data.get("middle_name", ""),
+                data.get("address", ""),
+                data.get("phone", "")
+            )
 
     @property
     def client_id(self):
