@@ -1,5 +1,22 @@
 import json
-class Client:
+class ClientBase:
+    def __init__(self, client_id, last_name):
+        self._client_id = client_id
+        self._last_name = last_name
+
+    @property
+    def client_id(self):
+        return self._client_id
+
+    @property
+    def last_name(self):
+        return self._last_name
+
+    def __eq__(self, other):
+        if not isinstance(other, ClientBase):
+            return False
+        return self._client_id == other._client_id and self._last_name == other._last_name
+class Client(ClientBase):
     def validate_client_id(value):
         if not isinstance(value, str) or not value.strip():
             raise ValueError("client_id должен быть непустой строкой")
@@ -21,14 +38,14 @@ class Client:
         self.validate_name(middle_name)
         self.validate_phone(phone)
 
-    def __init__(self, client_id: str, last_name: str, first_name: str, middle_name: str, address: str, phone: str):
-        self._validate_all(client_id, last_name, first_name,middle_name, phone)
-        self._client_id = client_id
-        self._last_name = last_name
+    def __init__(self, client_id, last_name, first_name, middle_name, address, phone):
+        super().__init__(client_id, last_name)
+        self._validate_all(client_id, last_name, first_name, phone)
         self._first_name = first_name
         self._middle_name = middle_name
         self._address = address
         self._phone = phone
+
 
         def from_string(cls, s):
             parts = s.split(';')
@@ -58,12 +75,10 @@ class Client:
             initials = f"{self._first_name[0] if self._first_name else ''}.{self._middle_name[0] if self._middle_name else ''}."
             return f"{self._last_name} {initials}"
 
-
         def __eq__(self, other):
             if not isinstance(other, Client):
                 return False
-            return (self._client_id == other._client_id and
-                    self._last_name == other._last_name and
+            return (super().__eq__(other) and
                     self._first_name == other._first_name and
                     self._middle_name == other._middle_name and
                     self._address == other._address and
@@ -123,11 +138,10 @@ class Client:
         self.validate_phone(value)
         self._phone = value
 
-class ClientShort:
+class ClientShort(ClientBase):
     def __init__(self, client_id, last_name, initials, phone):
-        self._client_id = client_id
-        self._last_name = last_name
-        self._initials = initials  # например "И.И."
+        super().__init__(client_id, last_name)
+        self._initials = initials
         self._phone = phone
 
     def __str__(self):
@@ -139,7 +153,6 @@ class ClientShort:
     def __eq__(self, other):
         if not isinstance(other, ClientShort):
             return False
-        return (self._client_id == other._client_id and
-                self._last_name == other._last_name and
+        return (super().__eq__(other) and
                 self._initials == other._initials and
                 self._phone == other._phone)
