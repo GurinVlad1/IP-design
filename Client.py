@@ -1,3 +1,4 @@
+
 import json
 class Client:
     def validate_client_id(value):
