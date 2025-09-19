@@ -1,4 +1,3 @@
-
 import json
 class Client:
     def validate_client_id(value):
@@ -123,3 +122,24 @@ class Client:
     def phone(self, value):
         self.validate_phone(value)
         self._phone = value
+
+class ClientShort:
+    def __init__(self, client_id, last_name, initials, phone):
+        self._client_id = client_id
+        self._last_name = last_name
+        self._initials = initials  # например "И.И."
+        self._phone = phone
+
+    def __str__(self):
+        return f"ClientShort(client_id={self._client_id}, last_name={self._last_name}, initials={self._initials}, phone={self._phone})"
+
+    def short_str(self):
+        return f"{self._last_name} {self._initials} Тел: {self._phone}"
+
+    def __eq__(self, other):
+        if not isinstance(other, ClientShort):
+            return False
+        return (self._client_id == other._client_id and
+                self._last_name == other._last_name and
+                self._initials == other._initials and
+                self._phone == other._phone)
