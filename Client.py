@@ -12,12 +12,16 @@ class Client:
     def validate_phone(value):
         if not isinstance(value, str) or not value.strip():
             raise ValueError("Телефон должен быть непустой строкой")
-    def __init__(self, client_id: str, last_name: str, first_name: str, middle_name: str, address: str, phone: str):
+
+    def _validate_all(self, client_id, last_name, first_name,middle_name, phone):
         self.validate_client_id(client_id)
         self.validate_name(last_name)
         self.validate_name(first_name)
-        self.validate_phone(phone)
         self.validate_name(middle_name)
+        self.validate_phone(phone)
+
+    def __init__(self, client_id: str, last_name: str, first_name: str, middle_name: str, address: str, phone: str):
+        self._validate_all(client_id, last_name, first_name,middle_name, phone)
         self._client_id = client_id
         self._last_name = last_name
         self._first_name = first_name
