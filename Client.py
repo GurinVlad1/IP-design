@@ -1,5 +1,23 @@
 class Client:
+    def validate_client_id(value):
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("client_id должен быть непустой строкой")
+
+    @staticmethod
+    def validate_name(value):
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("Имя/Фамилия должны быть непустой строкой")
+
+    @staticmethod
+    def validate_phone(value):
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("Телефон должен быть непустой строкой")
     def __init__(self, client_id: str, last_name: str, first_name: str, middle_name: str, address: str, phone: str):
+        self.validate_client_id(client_id)
+        self.validate_name(last_name)
+        self.validate_name(first_name)
+        self.validate_phone(phone)
+        self.validate_name(middle_name)
         self._client_id = client_id
         self._last_name = last_name
         self._first_name = first_name
@@ -13,6 +31,7 @@ class Client:
 
     @client_id.setter
     def client_id(self, value):
+        self.validate_client_id(value)
         self._client_id = value
 
     @property
@@ -21,6 +40,7 @@ class Client:
 
     @last_name.setter
     def last_name(self, value):
+        self.validate_name(value)
         self._last_name = value
 
     @property
@@ -29,6 +49,7 @@ class Client:
 
     @first_name.setter
     def first_name(self, value):
+        self.validate_name(value)
         self._first_name = value
 
     @property
@@ -37,6 +58,7 @@ class Client:
 
     @middle_name.setter
     def middle_name(self, value):
+        self.validate_middle_name(value)
         self._middle_name = value
 
     @property
@@ -45,6 +67,7 @@ class Client:
 
     @address.setter
     def address(self, value):
+        self.validate_address(value)
         self._address = value
 
     @property
@@ -53,4 +76,5 @@ class Client:
 
     @phone.setter
     def phone(self, value):
+        self.validate_phone(value)
         self._phone = value
