@@ -1,25 +1,7 @@
 import json
 
 
-class ClientBase:
-    def __init__(self, client_id, last_name):
-        self._client_id = client_id
-        self._last_name = last_name
-
-    # Перегрузка для сравнения
-    def __eq__(self, other):
-        if not isinstance(other, ClientBase):
-            return False
-        return self._client_id == other._client_id and self._last_name == other._last_name
-
-    # Перегрузка для сравнения по client_id (меньше)
-    def __lt__(self, other):
-        if not isinstance(other, ClientBase):
-            return NotImplemented
-        return self._client_id < other._client_id
-
-
-class Client(ClientBase):
+class ClientShort:
     @staticmethod
     def validate_client_id(value):
         if not isinstance(value, str) or not value.strip():
@@ -31,171 +13,15 @@ class Client(ClientBase):
             raise ValueError("Имя/Фамилия должны быть непустой строкой")
 
     @staticmethod
+    def validate_initials(value):
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("Инициалы должны быть непустой строкой")
+
+    @staticmethod
     def validate_phone(value):
         if not isinstance(value, str) or not value.strip():
             raise ValueError("Телефон должен быть непустой строкой")
 
-    def __init__(self, *args):
-        if len(args) == 1:
-            arg = args[0]
-            if isinstance(arg, str):
-                # Попытка парсинга как JSON
-                try:
-                    data = json.loads(arg)
-                    client_id = data.get("client_id", "")
-                    last_name = data.get("last_name", "")
-                    first_name = data.get("first_name", "")
-                    middle_name = data.get("middle_name", "")
-                    address = data.get("address", "")
-                    phone = data.get("phone", "")
-                except json.JSONDecodeError:
-                    # Парсинг как строка: client_id;last_name;first_name;middle_name;address;phone
-                    parts = arg.split(';')
-                    if len(parts) != 6:
-                        raise ValueError("Неверный формат строки или JSON")
-                    client_id = parts[0].strip()
-                    last_name = parts[1].strip()
-                    first_name = parts[2].strip()
-                    middle_name = parts[3].strip()
-                    address = parts[4].strip()
-                    phone = parts[5].strip()
-            elif isinstance(arg, dict):
-                # Прямая передача dict (JSON-like)
-                client_id = arg.get("client_id", "")
-                last_name = arg.get("last_name", "")
-                first_name = arg.get("first_name", "")
-                middle_name = arg.get("middle_name", "")
-                address = arg.get("address", "")
-                phone = arg.get("phone", "")
-            else:
-                raise ValueError("Неверный тип аргумента для перегрузки")
-        elif len(args) == 6:
-            client_id, last_name, first_name, middle_name, address, phone = args
-        else:
-            raise ValueError("Неверное количество аргументов для Client")
-
-        # Валидация и инициализация
-        self.validate_client_id(client_id)
-        self.validate_name(last_name)
-        self.validate_name(first_name)
-        self.validate_name(middle_name)
-        self.validate_phone(phone)
-        super().__init__(client_id, last_name)
-        self._first_name = first_name
-        self._middle_name = middle_name
-        self._address = address
-        self._phone = phone
-
-    @classmethod
-    def from_string(cls, s):
-        # Парсинг строки в формате: client_id;last_name;first_name;middle_name;address;phone
-        parts = s.split(';')
-        if len(parts) != 6:
-            raise ValueError("Неверный формат строки")
-        client_id = parts[0].strip()
-        last_name = parts[1].strip()
-        first_name = parts[2].strip()
-        middle_name = parts[3].strip()
-        address = parts[4].strip()
-        phone = parts[5].strip()
-        return cls(client_id, last_name, first_name, middle_name, address, phone)
-
-    @classmethod
-    def from_json(cls, json_str):
-        data = json.loads(json_str)
-        client_id = data.get("client_id", "")
-        last_name = data.get("last_name", "")
-        first_name = data.get("first_name", "")
-        middle_name = data.get("middle_name", "")
-        address = data.get("address", "")
-        phone = data.get("phone", "")
-        return cls(client_id, last_name, first_name, middle_name, address, phone)
-
-    def __str__(self):
-        return (f"Client(client_id={self._client_id}, last_name={self._last_name}, first_name={self._first_name}, "
-                f"middle_name={self._middle_name}, address={self._address}, phone={self._phone})")
-
-    def short_str(self):
-        initials = f"{self._first_name[0] if self._first_name else ''}.{self._middle_name[0] if self._middle_name else ''}."
-        return f"{self._last_name} {initials}"
-
-    def __eq__(self, other):
-        if not isinstance(other, Client):
-            return False
-        return (super().__eq__(other) and
-                self._first_name == other._first_name and
-                self._middle_name == other._middle_name and
-                self._address == other._address and
-                self._phone == other._phone)
-
-    # Перегрузка для сложения (объединение имен)
-    def __add__(self, other):
-        if not isinstance(other, Client):
-            return NotImplemented
-        new_last_name = self._last_name + "-" + other._last_name
-        new_first_name = self._first_name + " " + other._first_name
-        new_middle_name = self._middle_name + " " + other._middle_name
-        new_address = self._address + "; " + other._address
-        new_phone = self._phone + " / " + other._phone
-        return Client(self._client_id, new_last_name, new_first_name, new_middle_name, new_address, new_phone)
-
-    @property
-    def client_id(self):
-        return self._client_id
-
-    @client_id.setter
-    def client_id(self, value):
-        self.validate_client_id(value)
-        self._client_id = value
-
-    @property
-    def last_name(self):
-        return self._last_name
-
-    @last_name.setter
-    def last_name(self, value):
-        self.validate_name(value)
-        self._last_name = value
-
-    @property
-    def first_name(self):
-        return self._first_name
-
-    @first_name.setter
-    def first_name(self, value):
-        self.validate_name(value)
-        self._first_name = value
-
-    @property
-    def middle_name(self):
-        return self._middle_name
-
-    @middle_name.setter
-    def middle_name(self, value):
-        self.validate_name(value)
-        self._middle_name = value
-
-    @property
-    def address(self):
-        return self._address
-
-    @address.setter
-    def address(self, value):
-        if not isinstance(value, str) or not value.strip():
-            raise ValueError("Адрес должен быть непустой строкой")
-        self._address = value
-
-    @property
-    def phone(self):
-        return self._phone
-
-    @phone.setter
-    def phone(self, value):
-        self.validate_phone(value)
-        self._phone = value
-
-
-class ClientShort(ClientBase):
     def __init__(self, *args):
         if len(args) == 1:
             arg = args[0]
@@ -229,9 +55,13 @@ class ClientShort(ClientBase):
         else:
             raise ValueError("Неверное количество аргументов для ClientShort")
 
-        if not client_id or not last_name or not initials or not phone:
-            raise ValueError("Все поля должны быть заполнены")
-        super().__init__(client_id, last_name)
+        # Валидация и инициализация
+        self.validate_client_id(client_id)
+        self.validate_name(last_name)
+        self.validate_initials(initials)
+        self.validate_phone(phone)
+        self._client_id = client_id
+        self._last_name = last_name
         self._initials = initials
         self._phone = phone
 
@@ -256,18 +86,223 @@ class ClientShort(ClientBase):
         phone = data.get("phone", "")
         return cls(client_id, last_name, initials, phone)
 
+    @classmethod
+    def from_json_file(cls, file_path):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                json_str = f.read()
+            return cls.from_json(json_str)
+        except FileNotFoundError:
+            raise ValueError(f"Файл {file_path} не найден")
+        except json.JSONDecodeError:
+            raise ValueError(f"Неверный JSON в файле {file_path}")
+
     def __str__(self):
         return f"ClientShort(client_id={self._client_id}, last_name={self._last_name}, initials={self._initials}, phone={self._phone})"
 
     def short_str(self):
         return f"{self._last_name} {self._initials} Тел: {self._phone}"
 
+    # Перегрузка для сравнения
     def __eq__(self, other):
         if not isinstance(other, ClientShort):
             return False
-        return (super().__eq__(other) and
+        return (self._client_id == other._client_id and
+                self._last_name == other._last_name and
                 self._initials == other._initials and
                 self._phone == other._phone)
+
+    # Перегрузка для сравнения по client_id (меньше)
+    def __lt__(self, other):
+        if not isinstance(other, ClientShort):
+            return NotImplemented
+        return self._client_id < other._client_id
+
+    @property
+    def client_id(self):
+        return self._client_id
+
+    @client_id.setter
+    def client_id(self, value):
+        self.validate_client_id(value)
+        self._client_id = value
+
+    @property
+    def last_name(self):
+        return self._last_name
+
+    @last_name.setter
+    def last_name(self, value):
+        self.validate_name(value)
+        self._last_name = value
+
+    @property
+    def initials(self):
+        return self._initials
+
+    @initials.setter
+    def initials(self, value):
+        self.validate_initials(value)
+        self._initials = value
+
+    @property
+    def phone(self):
+        return self._phone
+
+    @phone.setter
+    def phone(self, value):
+        self.validate_phone(value)
+        self._phone = value
+
+
+class Client(ClientShort):
+    def __init__(self, *args):
+        if len(args) == 1:
+            arg = args[0]
+            if isinstance(arg, str):
+                # Попытка парсинга как JSON
+                try:
+                    data = json.loads(arg)
+                    client_id = data.get("client_id", "")
+                    last_name = data.get("last_name", "")
+                    first_name = data.get("first_name", "")
+                    middle_name = data.get("middle_name", "")
+                    address = data.get("address", "")
+                    phone = data.get("phone", "")
+                    initials = f"{first_name[0] if first_name else ''}.{middle_name[0] if middle_name else ''}."
+                except json.JSONDecodeError:
+                    # Парсинг как строка: client_id;last_name;first_name;middle_name;address;phone
+                    parts = arg.split(';')
+                    if len(parts) != 6:
+                        raise ValueError("Неверный формат строки или JSON")
+                    client_id = parts[0].strip()
+                    last_name = parts[1].strip()
+                    first_name = parts[2].strip()
+                    middle_name = parts[3].strip()
+                    address = parts[4].strip()
+                    phone = parts[5].strip()
+                    initials = f"{first_name[0] if first_name else ''}.{middle_name[0] if middle_name else ''}."
+            elif isinstance(arg, dict):
+                # Прямая передача dict (JSON-like)
+                client_id = arg.get("client_id", "")
+                last_name = arg.get("last_name", "")
+                first_name = arg.get("first_name", "")
+                middle_name = arg.get("middle_name", "")
+                address = arg.get("address", "")
+                phone = arg.get("phone", "")
+                initials = f"{first_name[0] if first_name else ''}.{middle_name[0] if middle_name else ''}."
+            else:
+                raise ValueError("Неверный тип аргумента для перегрузки")
+        elif len(args) == 6:
+            client_id, last_name, first_name, middle_name, address, phone = args
+            initials = f"{first_name[0] if first_name else ''}.{middle_name[0] if middle_name else ''}."
+        else:
+            raise ValueError("Неверное количество аргументов для Client")
+
+        # Валидация и инициализация дополнительных полей
+        self.validate_name(first_name)
+        self.validate_name(middle_name)
+        if not isinstance(address, str) or not address.strip():
+            raise ValueError("Адрес должен быть непустой строкой")
+        super().__init__(client_id, last_name, initials, phone)
+        self._first_name = first_name
+        self._middle_name = middle_name
+        self._address = address
+
+    @classmethod
+    def from_string(cls, s):
+        # Парсинг строки в формате: client_id;last_name;first_name;middle_name;address;phone
+        parts = s.split(';')
+        if len(parts) != 6:
+            raise ValueError("Неверный формат строки")
+        client_id = parts[0].strip()
+        last_name = parts[1].strip()
+        first_name = parts[2].strip()
+        middle_name = parts[3].strip()
+        address = parts[4].strip()
+        phone = parts[5].strip()
+        return cls(client_id, last_name, first_name, middle_name, address, phone)
+
+    @classmethod
+    def from_json(cls, json_str):
+        data = json.loads(json_str)
+        client_id = data.get("client_id", "")
+        last_name = data.get("last_name", "")
+        first_name = data.get("first_name", "")
+        middle_name = data.get("middle_name", "")
+        address = data.get("address", "")
+        phone = data.get("phone", "")
+        return cls(client_id, last_name, first_name, middle_name, address, phone)
+
+    @classmethod
+    def from_json_file(cls, file_path):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                json_str = f.read()
+            return cls.from_json(json_str)
+        except FileNotFoundError:
+            raise ValueError(f"Файл {file_path} не найден")
+        except json.JSONDecodeError:
+            raise ValueError(f"Неверный JSON в файле {file_path}")
+
+    def __str__(self):
+        return (f"Client(client_id={self._client_id}, last_name={self._last_name}, first_name={self._first_name}, "
+                f"middle_name={self._middle_name}, address={self._address}, phone={self._phone})")
+
+    def short_str(self):
+        initials = f"{self._first_name[0] if self._first_name else ''}.{self._middle_name[0] if self._middle_name else ''}."
+        return f"{self._last_name} {initials}"
+
+    def __eq__(self, other):
+        if not isinstance(other, Client):
+            return False
+        return (super().__eq__(other) and
+                self._first_name == other._first_name and
+                self._middle_name == other._middle_name and
+                self._address == other._address)
+
+    # Перегрузка для сложения (объединение имен)
+    def __add__(self, other):
+        if not isinstance(other, Client):
+            return NotImplemented
+        new_last_name = self._last_name + "-" + other._last_name
+        new_first_name = self._first_name + " " + other._first_name
+        new_middle_name = self._middle_name + " " + other._middle_name
+        new_address = self._address + "; " + other._address
+        new_phone = self._phone + " / " + other._phone
+        return Client(self._client_id, new_last_name, new_first_name, new_middle_name, new_address, new_phone)
+
+    @property
+    def first_name(self):
+        return self._first_name
+
+    @first_name.setter
+    def first_name(self, value):
+        self.validate_name(value)
+        self._first_name = value
+        # Обновляем initials при изменении first_name
+        self._initials = f"{self._first_name[0] if self._first_name else ''}.{self._middle_name[0] if self._middle_name else ''}."
+
+    @property
+    def middle_name(self):
+        return self._middle_name
+
+    @middle_name.setter
+    def middle_name(self, value):
+        self.validate_name(value)
+        self._middle_name = value
+        # Обновляем initials при изменении middle_name
+        self._initials = f"{self._first_name[0] if self._first_name else ''}.{self._middle_name[0] if self._middle_name else ''}."
+
+    @property
+    def address(self):
+        return self._address
+
+    @address.setter
+    def address(self, value):
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("Адрес должен быть непустой строкой")
+        self._address = value
 
 
 # Код для ввода и вывода (не трогает классы выше)
@@ -320,6 +355,16 @@ if __name__ == "__main__":
     except ValueError as e:
         print(f"Ошибка: {e}")
 
+    # Создание Client из JSON-файла
+    print("\n3a. Создание объекта Client из JSON-файла")
+    file_path = input("Введите путь к JSON-файлу для Client: ").strip()
+    try:
+        client3a = Client.from_json_file(file_path)
+        print(f"Создан объект: {client3a}")
+        print(f"Короткая строка: {client3a.short_str()}")
+    except ValueError as e:
+        print(f"Ошибка: {e}")
+
     # Создание ClientShort обычным способом (4 аргумента) - hardcoded
     print("\n4. Создание объекта ClientShort обычным способом (4 аргумента) - hardcoded")
     try:
@@ -360,6 +405,16 @@ if __name__ == "__main__":
         client_short3 = ClientShort(json_str_short)  # Перегрузка!
         print(f"Создан объект: {client_short3}")
         print(f"Короткая строка: {client_short3.short_str()}")
+    except ValueError as e:
+        print(f"Ошибка: {e}")
+
+    # Создание ClientShort из JSON-файла
+    print("\n6a. Создание объекта ClientShort из JSON-файла")
+    file_path_short = input("Введите путь к JSON-файлу для ClientShort: ").strip()
+    try:
+        client_short3a = ClientShort.from_json_file(file_path_short)
+        print(f"Создан объект: {client_short3a}")
+        print(f"Короткая строка: {client_short3a.short_str()}")
     except ValueError as e:
         print(f"Ошибка: {e}")
 
